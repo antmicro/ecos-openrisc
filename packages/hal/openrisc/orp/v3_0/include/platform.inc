@@ -79,6 +79,7 @@
         # Platform-specific, post-reset hardware initialization
         .macro  hal_hardware_init
 init_mc:
+//FIXME enable this for ORP
 #if 0
         load32i r3,MC_BASE_ADD
 

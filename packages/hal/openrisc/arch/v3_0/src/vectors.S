@@ -812,15 +812,15 @@ FUNC_END(hal_program_new_stack)
         .section ".bss"
 
         .balign 16
-        .global _cyg_interrupt_stack_base
-_cyg_interrupt_stack_base:
+        .global cyg_interrupt_stack_base
+cyg_interrupt_stack_base:
 __interrupt_stack_base:
         .rept CYGNUM_HAL_COMMON_INTERRUPTS_STACK_SIZE
         .byte 0
         .endr
         .balign 16
-        .global _cyg_interrupt_stack
-_cyg_interrupt_stack:
+        .global cyg_interrupt_stack
+cyg_interrupt_stack:
 __interrupt_stack:
         
         .long   0,0,0,0,0,0,0,0 

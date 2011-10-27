@@ -265,7 +265,7 @@ FUNC_START(hal_setjmp)
         l.sw    CYGARC_JMP_BUF_R26 * OR1K_GPRSIZE(r3), r26
         l.sw    CYGARC_JMP_BUF_R28 * OR1K_GPRSIZE(r3), r28
         l.sw    CYGARC_JMP_BUF_R30 * OR1K_GPRSIZE(r3), r30
-        load32i rv, 0
+        load32i rv, 0	#FIXME check this
         l.jr    lr
         l.nop                   # delay slot
 FUNC_END(hal_setjmp)

@@ -297,4 +297,10 @@ void __cxa_atexit(void (*arg1)(void*), void* arg2, void* arg3)
 
 void *__dso_handle = (void*) &__dso_handle;
 
+#include <sys/reent.h>
+
+static struct _reent __impure_data = _REENT_INIT (__impure_data);
+
+struct _reent  *_impure_ptr = &__impure_data;
+
 /* End of hal_misc.c                                                      */

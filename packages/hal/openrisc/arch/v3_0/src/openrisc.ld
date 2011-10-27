@@ -53,7 +53,7 @@ ENTRY(__exception_reset)
 #ifdef EXTRAS
 INPUT(extras.o)
 #endif
-GROUP(libtarget.a libgcc.a)
+GROUP(libtarget.a libgcc.a libsupc++.a)
 
 #define ALIGN_LMA 8
 #define FOLLOWING(_section_) AT ((LOADADDR (_section_) + SIZEOF (_section_) + ALIGN_LMA - 1) & ~ (ALIGN_LMA - 1))
@@ -118,7 +118,7 @@ GROUP(libtarget.a libgcc.a)
 
 #define SECTION_gcc_except_table(_region_, _vma_, _lma_)       \
     .gcc_except_table _vma_ : _lma_                                           \
-    { __EXCEPT_START__ = ABSOLUTE(.); *(.gcc_except_table)              \
+    { __EXCEPT_START__ = ABSOLUTE(.); *(.gcc_except_table.*)              \
       __EXCEPT_END__ = ABSOLUTE(.);}                                    \
     > _region_
 
