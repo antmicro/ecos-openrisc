@@ -91,8 +91,9 @@ cdl_option CYGBLD_GLOBAL_COMMAND_PREFIX {
 #
 cdl_option CYGBLD_GLOBAL_CFLAGS {
     # Flavor: data
-    # user_value "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
-    # value_source user
+    # No user value, uncomment the following line to provide one.
+    # user_value "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
+    # value_source default
     # Default value: "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
 
     # The following properties are affected by this value
@@ -128,8 +129,8 @@ cdl_option CYGBLD_BUILD_GDB_STUBS {
     # value_source default
     # Default value: 0
     # Requires:  CYG_HAL_STARTUP == "ROM" 
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 1
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 0
     # Requires: CYGSEM_HAL_ROM_MONITOR
     #     CYGSEM_HAL_ROM_MONITOR == 0
     #   --> 0
@@ -1006,11 +1007,11 @@ cdl_option CYGSEM_HAL_INSTALL_MMU_TABLES {
 
     # Flavor: bool
     # No user value, uncomment the following line to provide one.
-    # user_value 1
+    # user_value 0
     # value_source default
     # Default value:  CYG_HAL_STARTUP != "RAM" 
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 1
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 0
 
     # The following properties are affected by this value
     # option CYGSEM_HAL_STATIC_MMU_TABLES
@@ -1053,13 +1054,12 @@ cdl_component CYGDBG_HAL_DIAG_TO_DEBUG_CHAN {
     #   --> 1
 
     # Flavor: bool
-    # No user value, uncomment the following line to provide one.
-    # user_value 0
-    # value_source default
+    user_value 0
+    # value_source user
     # Default value:  (CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS  || CYG_HAL_STARTUP == "RAM") ? 1 : 0
     #     CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS == 0
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 0
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 1
 
     # The following properties are affected by this value
     # option CYGPRI_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL_CONFIGURABLE
@@ -1737,7 +1737,7 @@ cdl_option CYGSEM_HAL_VIRTUAL_VECTOR_INIT_WHOLE_TABLE {
     # user_value 1
     # value_source default
     # Default value:  CYG_HAL_STARTUP != "RAM" || !CYGSEM_HAL_USE_ROM_MONITOR 
-    #     CYG_HAL_STARTUP == ROM
+    #     CYG_HAL_STARTUP == RAM
     #     CYGSEM_HAL_USE_ROM_MONITOR == 0
     #   --> 1
     # Requires: CYGSEM_HAL_VIRTUAL_VECTOR_CLAIM_RESET
@@ -1950,16 +1950,15 @@ cdl_option CYGSEM_HAL_VIRTUAL_VECTOR_DIAG {
 #
 cdl_option CYGSEM_HAL_USE_ROM_MONITOR {
     # Flavor: booldata
-    # No user value, uncomment the following line to provide one.
-    # user_value 0 0
-    # value_source default
+    user_value 0 CygMon
+    # value_source user
     # Default value:  CYG_HAL_STARTUP == "RAM" ? "CygMon" : 0 
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 0 0
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 1 CygMon
     # Legal values:  "Generic" "CygMon" "GDB_stubs" 
     # Requires:  CYG_HAL_STARTUP == "RAM" 
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 0
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 1
 
     # The following properties are affected by this value
     # option CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS
@@ -1985,8 +1984,8 @@ cdl_option CYGSEM_HAL_ROM_MONITOR {
     # value_source user
     # Default value: 1
     # Requires:  CYG_HAL_STARTUP == "ROM" 
-    #     CYG_HAL_STARTUP == ROM
-    #   --> 1
+    #     CYG_HAL_STARTUP == RAM
+    #   --> 0
 
     # The following properties are affected by this value
     # option CYGBLD_BUILD_GDB_STUBS
@@ -2175,9 +2174,8 @@ cdl_package CYGPKG_HAL_OPENRISC_ORP {
 #
 cdl_component CYG_HAL_STARTUP {
     # Flavor: data
-    # No user value, uncomment the following line to provide one.
-    # user_value ROM
-    # value_source default
+    user_value RAM
+    # value_source user
     # Default value: ROM
     # Legal values: "RAM" "ROM"
 
@@ -2344,9 +2342,9 @@ cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL {
 #
 cdl_component CYGHWR_MEMORY_LAYOUT {
     # Calculated value:  CYG_HAL_STARTUP == "RAM" ? "openrisc_orp_ram" :  "openrisc_orp_rom" 
-    #     CYG_HAL_STARTUP == ROM
+    #     CYG_HAL_STARTUP == RAM
     # Flavor: data
-    # Current_value: openrisc_orp_rom
+    # Current_value: openrisc_orp_ram
 };
 
 # >
@@ -2354,18 +2352,18 @@ cdl_component CYGHWR_MEMORY_LAYOUT {
 #
 cdl_option CYGHWR_MEMORY_LAYOUT_LDI {
     # Calculated value:  CYG_HAL_STARTUP == "RAM" ? "<pkgconf/mlt_openrisc_orp_ram.ldi>" :  "<pkgconf/mlt_openrisc_orp_rom.ldi>" 
-    #     CYG_HAL_STARTUP == ROM
+    #     CYG_HAL_STARTUP == RAM
     # Flavor: data
-    # Current_value: <pkgconf/mlt_openrisc_orp_rom.ldi>
+    # Current_value: <pkgconf/mlt_openrisc_orp_ram.ldi>
 };
 
 # Memory layout header file
 #
 cdl_option CYGHWR_MEMORY_LAYOUT_H {
     # Calculated value:  CYG_HAL_STARTUP == "RAM" ? "<pkgconf/mlt_openrisc_orp_ram.h>" :  "<pkgconf/mlt_openrisc_orp_rom.h>" 
-    #     CYG_HAL_STARTUP == ROM
+    #     CYG_HAL_STARTUP == RAM
     # Flavor: data
-    # Current_value: <pkgconf/mlt_openrisc_orp_rom.h>
+    # Current_value: <pkgconf/mlt_openrisc_orp_ram.h>
 };
 
 # <
@@ -3940,7 +3938,7 @@ cdl_option CYGBLD_INFRA_CFLAGS_WARNINGS_AS_ERRORS {
     # value_source default
     # Default value: 0
     # Requires:  is_substr(CYGBLD_GLOBAL_CFLAGS, " -Werror") 
-    #     CYGBLD_GLOBAL_CFLAGS == "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
+    #     CYGBLD_GLOBAL_CFLAGS == "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
     #   --> 0
 };
 
@@ -3957,7 +3955,7 @@ cdl_option CYGBLD_INFRA_CFLAGS_PIPE {
     # value_source default
     # Default value: 0
     # Requires:  is_substr(CYGBLD_GLOBAL_CFLAGS, " -pipe") 
-    #     CYGBLD_GLOBAL_CFLAGS == "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
+    #     CYGBLD_GLOBAL_CFLAGS == "-msoft-float -Wall -Wpointer-arith -Wstrict-prototypes -Winline -Wundef -Woverloaded-virtual -g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions -fvtable-gc -finit-priority"
     #   --> 0
 };
 
