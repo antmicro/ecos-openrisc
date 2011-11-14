@@ -265,7 +265,7 @@ FUNC_START(hal_setjmp)
         l.sw    CYGARC_JMP_BUF_R26 * OR1K_GPRSIZE(r3), r26
         l.sw    CYGARC_JMP_BUF_R28 * OR1K_GPRSIZE(r3), r28
         l.sw    CYGARC_JMP_BUF_R30 * OR1K_GPRSIZE(r3), r30
-        load32i rv, 0	#FIXME check this
+        load32i rv, 0
         l.jr    lr
         l.nop                   # delay slot
 FUNC_END(hal_setjmp)
@@ -286,7 +286,8 @@ FUNC_START(hal_longjmp)
         l.lwz   r26, CYGARC_JMP_BUF_R26 * OR1K_GPRSIZE(r3)
         l.lwz   r28, CYGARC_JMP_BUF_R28 * OR1K_GPRSIZE(r3)
         l.lwz   r30, CYGARC_JMP_BUF_R30 * OR1K_GPRSIZE(r3)
-
+	l.movhi rv, 0
+	l.or    rv, rv, r4
         l.jr    lr
         l.nop                   # delay slot
 FUNC_END(hal_longjmp)
