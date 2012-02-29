@@ -40,7 +40,7 @@
 #######DESCRIPTIONBEGIN####
 ##
 ## Author(s):   Scott Furman
-## Contributors:
+## Contributors:Piotr Skrzypek (pskrzypek@antmicro.com)
 ## Date:        2003-01-21
 ## Purpose:     OpenRISC context switch code
 ## Description: This file contains implementations of the thread context 
