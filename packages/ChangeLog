@@ -1,7 +1,93 @@
+2012-03-12 Christophe Coutand  <ecos@hotmail.co.uk>
+
+    ecos.db: Add Actel SmartFusion A2Fvvv variant HAL, board support
+    package for Actel A2F200 inluding Actel serial, ethernet, spi and
+    i2c drivers as well as spi flash driver.
+
+2012-02-22  Ilija Kocho  <ilijak@siva.com.mk>
+
+    ecos.db: Add TWR-K60N512-FXM, Freescale DSPI driver,
+    Freescale EDMA library, Micron CellularRAM support.
+
+2011-10-30  Ilija Kocho  <ilijak@siva.com.mk>
+
+	* NEWS, ecos.db: Add Freescale Kinetis variant HAL, board support
+	packages for TWR-K60N512 and TWR-K40X256 including Freescale serial
+	and ethernet drivers.
+
+2011-05-25  Christophe Coutand  <ecos@hotmail.co.uk>
+
+	* NEWS, ecos.db: Add SPI flash driver for SST25xx devices.
+
+2011-05-25  Christophe Coutand  <ecos@hotmail.co.uk>
+
+	* NEWS, ecos.db: Add SPI flash driver for Atmel AT25DFxxx.
+
+2011-03-13  Ilija Kocho  <ilijak@siva.com.mk>
+
+	* NEWS, ecos.db: Add LPC17XX variant HAL, support for
+	NXP Cortex M3 LPC17XX CPUs. BSP for Olimex LPC-1766-STK
+	board including ethernet, serial and wallclock drivers.
+
+2011-03-13  Ilija Kocho  <ilijak@siva.com.mk>
+
+	* ecos.db: Ethernet, serial, and wallclock drivers for LPC17XX.
+	(CYGPKG_DEVICES_WALLCLOCK_ARM_LPC2XXX): Fixed alias/description;
+	(CYGPKG_DEVS_ETH_ARM_LPC2XXX): Ditto.
+	(CYGPKG_IO_SERIAL_ARM_LPC24XX): Ditto.
+
+2011-02-22  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Add hardware package CYGPKG_DEVS_ADC_ARM_AT91 to
+	applicable target records: at91sam7sek, at91sam7xek, sam7ex256,
+	eb55, phycore
+
+2011-02-18  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Remove non-hardware package CYGPKG_IO_ADC from the
+	ek-lm3s811 target definition and eliminate leading space in alias
+	string for correct sorting of targets by name.
+
+2011-02-09  Christophe Coutand  <ccoutand@stmi.com>
+
+	* NEWS, ecos.db: Add Stellaris Cortex M3 variant HAL, support for
+	Stellaris Cortex M3 800 series CPUs. BSP for Stellaris EK-LM3S811
+	board including ADC and I2C drivers.
+
+2010-11-12  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Add USB mass storage function driver package.
+
+2010-10-27  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Add STM32 USB slave driver package.
+
+2010-05-30  Christophe Coutand  <ccoutand@stmi.com>
+
+	* ecos.db: Add AT91 ADC driver.
+
+2009-11-13  John Dallaway  <john@dallaway.org.uk>
+
+	* ecosadmin.tcl: Keep target records containing removed packages
+	by default. Add "--remove_targets" switch to force removal.
+
+2009-08-20  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Add uSTL package.
+
+2009-07-14  John Dallaway  <john@dallaway.org.uk>
+
+	* ecos.db: Add CYGPKG_IO_USB and CYGPKG_IO_USB_SLAVE hardware packages
+	to targets at91sam7sek, at91sam7xek and sam7ex256.
+
 2009-03-19  Ilija Kocho  <ilijak@siva.com.mk>
 
 	* ecos.db: target mac7100evb added word "Freescale" to the description.
 	
+2009-03-04  Nick Garnett  <nickg@ecoscentric.com>
+
+	* ecos.db: Add ADC synthetic driver. Add STM32 ADC driver.
+
 2009-02-12  John Dallaway  <john@dallaway.org.uk>
 
 	* ecos.db: Make CYGPKG_DEVS_FLASH_SPI_M25PXX a hardware package.
@@ -2758,7 +2844,7 @@ Mon Jul 27 19:36:53 BST 1998  Chris Provenzano  <proven@cygnus.com>
 // ####GPLCOPYRIGHTBEGIN####                                                
 // -------------------------------------------                              
 // This file is part of eCos, the Embedded Configurable Operating System.   
-// Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2009 Free Software Foundation, Inc.
+// Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2009, 2010, 2011 Free Software Foundation, Inc.
 //
 // This program is free software; you can redistribute it and/or modify     
 // it under the terms of the GNU General Public License as published by     

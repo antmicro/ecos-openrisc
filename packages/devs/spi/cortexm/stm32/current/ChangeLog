@@ -1,0 +1,74 @@
+2011-09-27  Ilija Stanislevik  <ilijas@siva.mk>
+
+	* src/spi_stm32.c: Add support for CYG_IO_GET_CONFIG_SPI_CLOCKRATE and
+	CYG_IO_SET_CONFIG_SPI_CLOCKRATE (possibility to retrieve and to set
+	the SPI clockrate).
+
+2011-03-10  John Dallaway  <john@dallaway.org.uk>
+
+	* cdl/spi_stm32.cdl: Add build options for CFLAGS and loopback test.
+
+2009-08-24  Simon Kallweit  <simon.kallweit@intefo.ch>
+
+	* cdl/spi_stm32.cdl: added testcase.
+	* include/spi_stm32.h: initializing spi_cr1_val with zero.
+
+2009-02-10  Bart Veer  <bartv@ecoscentric.com>
+
+	* src/spi_stm32.c (cyg_spi_cortexm_stm32_init): mark as
+	prioritized constructor and rename.
+
+	* cdl/spi_stm32.cdl: stop building spi_stm32_init.cxx
+
+	* src/spi_stm32_init.cxx: removed, no longer needed.
+
+2009-02-10  Chris Holgate  <chris@zynaptic.com>
+
+	* src/spi_stm32.c: 
+	* cdl/spi_stm32.cdl:
+	Add option to automatically disable JTAG port when initialising SPI3.
+
+2009-02-10  Nick Garnett  <nickg@ecoscentric.com>
+
+	* src/spi_stm32.c (bus3_setup): Fix typo.
+
+2009-02-05  Nick Garnett  <nickg@ecoscentric.com>
+
+	* include/spi_stm32.h: Add macro to define an STM32 SPI device.
+
+	* src/spi_stm32.c: Fix potential compile error.
+
+	* src/spi_stm32_init.cxx: Change constructor init priority to use
+	CYG_INIT_BUS_SPI.
+
+2009-01-30  Nick Garnett  <nickg@ecoscentric.com>
+
+	* cdl/spi_stm32.cdl: 
+	* include/spi_stm32.h: 
+	* src/spi_stm32.c: 
+	* src/spi_stm32_init.cxx:
+	New package, STM32 SPI driver contributed by Chris Holgate.
+
+//===========================================================================
+// ####GPLCOPYRIGHTBEGIN####                                                
+// -------------------------------------------                              
+// This file is part of eCos, the Embedded Configurable Operating System.   
+// Copyright (C) 2008, 2009, 2011 Free Software Foundation, Inc.
+//
+// This program is free software; you can redistribute it and/or modify     
+// it under the terms of the GNU General Public License as published by     
+// the Free Software Foundation; either version 2 or (at your option) any   
+// later version.                                                           
+//
+// This program is distributed in the hope that it will be useful, but      
+// WITHOUT ANY WARRANTY; without even the implied warranty of               
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU        
+// General Public License for more details.                                 
+//
+// You should have received a copy of the GNU General Public License        
+// along with this program; if not, write to the                            
+// Free Software Foundation, Inc., 51 Franklin Street,                      
+// Fifth Floor, Boston, MA  02110-1301, USA.                                
+// -------------------------------------------                              
+// ####GPLCOPYRIGHTEND####                                                  
+//===========================================================================

@@ -1,8 +1,33 @@
-* Port to Olimex LPC-L2294-1MB include ethernet and Flash drvers by
+* Freescale Kinetis variant HAL and BSP for TWR-K60N512 and TWR-K40X256
+  including Freescale UART and Ethernet drivers by Ilija Kocho.
+* SPI flash driver for Silicon Storage Technology (SST25xx devices)
+  by Christophe Coutand.
+* SPI flash driver for Atmel AT25DFxxx devices by Christophe Coutand.
+* LPC17XX variant HAL and BSP for Olimex LPC-1766-STK board including
+  ethernet, serial and wallclock drivers by Ilija Kocho.
+* LM3S variant HAL, generic support for the LM3S800 CPUs, and BSP for
+  Stellaris EK-LM3S811 board including ADC and I2C drivers by Christophe
+  Coutand
+* USB mass storage function driver by Christophe Coutand
+* AT91 USB slave driver halting endpoint support by Christophe Coutand
+* USB slave device driver for STM32 by Chris Holgate
+* Support for dynamic data endpoint configuration in USB serial function
+  device package by John Dallaway
+* Support for dynamic data endpoint configuration in USB slave API by
+  Chris Holgate
+* Update to uSTL 1.4 by Simon Kallweit
+* ADC device driver for AT91 by Christophe Coutand 
+* Major update of lwIP stack to v1.3.2 by Simon Kallweit
+* Port of uSTL 1.3 by Uwe Kindler
+* Port of PDCurses 3.4 by Sergei Gavrikov
+
+*********** eCos 3.0 release ************
+
+* Port to Olimex LPC-L2294-1MB including ethernet and Flash drivers by
   Sergei Gavrikov
-* Port to Olimex LPC-E2294 include ethernet and Flash drvers by
+* Port to Olimex LPC-E2294 including ethernet and Flash drivers by
   Sergei Gavrikov
-* Port to Olimex LPC-H2294 include a Flash drvers by Sergei Gavrikov
+* Port to Olimex LPC-H2294 including Flash drivers by Sergei Gavrikov
 * Intel Strataflash v2 flash driver contributed by eCosCentric Ltd.
 * New Flash API with lots of new goodies.
 * ADC device driver for EA2468 OEM board

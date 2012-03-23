@@ -1,3 +1,29 @@
+2012-03-13  John Dallaway  <john@dallaway.org.uk>
+
+	* sgml/doclist: Add Actel SmartFusion documentation.
+	* sgml/makemakefile: Update copyright dates.
+
+2011-02-09  John Dallaway  <john@dallaway.org.uk>
+
+	* sgml/makemakefile: Update copyright dates.
+
+2011-02-09  Christophe Coutand  <ccoutand@stmi.com>
+
+	* sgml/doclist: Add EK-LM3S811 documentation.
+
+2010-11-13  John Dallaway  <john@dallaway.org.uk>
+
+	* sgml/doclist: Add USB mass storage documentation.
+	
+2010-02-25  John Dallaway  <john@dallaway.org.uk>
+
+	* sgml/makemakefile: Update copyright dates.
+
+2009-08-24  Uwe Kindler <uwe_kindler@web.de>
+
+	* sgml/doclist: Add uSTL documentation.
+	* sgml/makemakefile: Update copyright dates.
+	
 2008-12-10  John Dallaway  <jld@ecoscentric.com>
 
 	* sgml/doclist: reference all documentation files.

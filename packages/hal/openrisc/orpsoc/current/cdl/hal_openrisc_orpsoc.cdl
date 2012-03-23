@@ -1,0 +1,126 @@
+# ====================================================================
+#
+#      hal_openrisc_orpsoc.cdl
+#
+#      OpenRISC Reference Platform (ORP) HAL package configuration data
+#
+# ====================================================================
+## ####ECOSGPLCOPYRIGHTBEGIN####                                            
+## -------------------------------------------                              
+## This file is part of eCos, the Embedded Configurable Operating System.   
+## Copyright (C) 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+##
+## eCos is free software; you can redistribute it and/or modify it under    
+## the terms of the GNU General Public License as published by the Free     
+## Software Foundation; either version 2 or (at your option) any later      
+## version.                                                                 
+##
+## eCos is distributed in the hope that it will be useful, but WITHOUT      
+## ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or    
+## FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License    
+## for more details.                                                        
+##
+## You should have received a copy of the GNU General Public License        
+## along with eCos; if not, write to the Free Software Foundation, Inc.,    
+## 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.            
+##
+## As a special exception, if other files instantiate templates or use      
+## macros or inline functions from this file, or you compile this file      
+## and link it with other works to produce a work based on this file,       
+## this file does not by itself cause the resulting work to be covered by   
+## the GNU General Public License. However the source code for this file    
+## must still be made available in accordance with section (3) of the GNU   
+## General Public License v2.                                               
+##
+## This exception does not invalidate any other reasons why a work based    
+## on this file might be covered by the GNU General Public License.         
+## -------------------------------------------                              
+## ####ECOSGPLCOPYRIGHTEND####                                              
+# ====================================================================
+######DESCRIPTIONBEGIN####
+#
+# Author(s):      sfurman
+# Contributors:
+# Date:           2003-01-20
+#
+#####DESCRIPTIONEND####
+#
+# ====================================================================
+
+cdl_package CYGPKG_HAL_OPENRISC_ORPSOC {
+    display  "OpenRISC System-on-Chip"
+    parent        CYGPKG_HAL_OPENRISC
+    include_dir   cyg/hal
+    hardware
+    description   "
+           The ORPSoC HAL package should be used when targetting the
+           OpenRISC Reference Platform."
+
+    compile       hal_diag.c hal_aux.c
+
+    implements    CYGINT_HAL_VIRTUAL_VECTOR_SUPPORT
+    implements    CYGINT_HAL_VIRTUAL_VECTOR_COMM_BAUD_SUPPORT
+
+    define_proc {
+        puts $::cdl_system_header "#define CYGBLD_HAL_TARGET_H   <pkgconf/hal_openrisc.h>"
+        puts $::cdl_system_header "#define CYGBLD_HAL_PLATFORM_H <pkgconf/hal_openrisc_orpsoc.h>"
+    }
+
+    cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL_BAUD {
+        display       "Diagnostic serial port baud rate"
+        flavor        data
+        legal_values  9600 19200 38400 57600 115200 230400 460800 921600
+        default_value 115200
+        description   "
+            This option selects the baud rate used for the diagnostic console.
+            Note: this should match the value chosen for the GDB port if the
+            diagnostic and GDB port are the same.
+            Note: very high baud rates are useful during simulation."
+    }
+
+    cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_DEBUG_CHANNEL_BAUD {
+        display       "GDB serial port baud rate"
+        flavor        data
+        legal_values  9600 19200 38400 57600 115200 230400 460800 921600
+        default_value 115200
+        description   "
+            This option controls the baud rate used for the GDB connection.
+            Note: very high baud rates are useful during simulation."
+    }
+
+    cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_COMM_CHANNELS {
+        display      "Number of communication channels on the board"
+        flavor       data
+        default_value  1
+    }
+
+    cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_DEBUG_CHANNEL {
+        display          "Debug serial port"
+        active_if        CYGPRI_HAL_VIRTUAL_VECTOR_DEBUG_CHANNEL_CONFIGURABLE
+        flavor data
+        legal_values     0 to CYGNUM_HAL_VIRTUAL_VECTOR_COMM_CHANNELS-1
+        default_value    0
+        description      "
+           The ORP platform has at least one serial port, but it can potentially have several.
+           This option chooses which port will be used to connect to a host
+           running GDB."
+    }
+ 
+     cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL {
+        display          "Diagnostic serial port"
+        active_if        CYGPRI_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL_CONFIGURABLE
+        flavor data
+        legal_values     0 to CYGNUM_HAL_VIRTUAL_VECTOR_COMM_CHANNELS-1
+        default_value    0
+        description      "
+           The ORP platform has at least one serial port, but it can potentially have several.
+           This option chooses which port will be used for diagnostic output."
+     }
+
+    define_proc {
+        puts $cdl_header "#define CYGHWR_HAL_VSR_TABLE    0"
+        puts $cdl_header "#define CYGHWR_HAL_VIRTUAL_VECTOR_TABLE 0xF00"
+    }
+}
+
+# EOF hal_openrisc_orpsoc.cdl
