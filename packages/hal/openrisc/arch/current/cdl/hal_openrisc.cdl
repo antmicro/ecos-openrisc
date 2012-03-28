@@ -182,7 +182,7 @@ cdl_package CYGPKG_HAL_OPENRISC {
             flavor  data
             no_define
             default_value { CYGBLD_GLOBAL_WARNFLAGS . 
-                            "-g -fno-omit-frame-pointer -fno-rtti -fno-exceptions " . 
+                            "-g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions " . 
                             (CYGHWR_MUL_IMPLEMENTED ? "-mhard-mul " : "-msoft-mul ") .
                             (CYGHWR_DIV_IMPLEMENTED ? "-mhard-div " : "-msoft-div ") .
                             (CYGHWR_FPU_IMPLEMENTED ? "-mhard-float " : "-msoft-float ") }
@@ -197,7 +197,7 @@ cdl_package CYGPKG_HAL_OPENRISC {
             display "Global linker flags"
             flavor  data
             no_define
-            default_value { "-g -nostdlib -Wl,--gc-sections -Wl,-static " . 
+            default_value { "-g -O2 -nostdlib -Wl,--gc-sections -Wl,-static " . 
                             (CYGHWR_MUL_IMPLEMENTED ? "-mhard-mul " : "-msoft-mul ") .
                             (CYGHWR_DIV_IMPLEMENTED ? "-mhard-div " : "-msoft-div ") .
                             (CYGHWR_FPU_IMPLEMENTED ? "-mhard-float " : "-msoft-float ") }

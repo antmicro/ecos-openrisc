@@ -122,6 +122,7 @@ __exception_\name:
         l.sw     8 * OR1K_GPRSIZE(sp), r8
         l.sw     9 * OR1K_GPRSIZE(sp), r9
         l.sw    11 * OR1K_GPRSIZE(sp), r11
+        l.sw    12 * OR1K_GPRSIZE(sp), r12
         l.sw    13 * OR1K_GPRSIZE(sp), r13
         l.sw    15 * OR1K_GPRSIZE(sp), r15
         l.sw    17 * OR1K_GPRSIZE(sp), r17
@@ -133,7 +134,6 @@ __exception_\name:
         l.sw    29 * OR1K_GPRSIZE(sp), r29
         l.sw    31 * OR1K_GPRSIZE(sp), r31
 
-#undef CYGDBG_HAL_COMMON_INTERRUPTS_SAVE_MINIMUM_CONTEXT
 #ifndef CYGDBG_HAL_COMMON_INTERRUPTS_SAVE_MINIMUM_CONTEXT
 
         # R0 is not typically stored because it is always zero-valued,
@@ -145,7 +145,6 @@ __exception_\name:
         # an ISR, but we can do so to make debugging easier.
         l.sw     2 * OR1K_GPRSIZE(sp), r2
         l.sw    10 * OR1K_GPRSIZE(sp), r10
-        l.sw    12 * OR1K_GPRSIZE(sp), r12
         l.sw    14 * OR1K_GPRSIZE(sp), r14
         l.sw    16 * OR1K_GPRSIZE(sp), r16
         l.sw    18 * OR1K_GPRSIZE(sp), r18
@@ -156,12 +155,12 @@ __exception_\name:
         l.sw    28 * OR1K_GPRSIZE(sp), r28
         l.sw    30 * OR1K_GPRSIZE(sp), r30
 
+#endif
 	# save MAC LO and HI regs
         l.mfspr r5,r0,SPR_MACLO
         l.sw    OR1KREG_MACLO(sp),r5
         l.mfspr r5,r0,SPR_MACHI
         l.sw    OR1KREG_MACHI(sp),r5
-#endif
         
         # Save SP of interruptee in reg dump
         l.addi  r5,sp,SIZEOF_OR1KREGS+132
@@ -660,6 +659,7 @@ restore_state:
         l.lwz   r8,   8 * OR1K_GPRSIZE(sp)
         l.lwz   r9,   9 * OR1K_GPRSIZE(sp)
         l.lwz   r11, 11 * OR1K_GPRSIZE(sp)
+        l.lwz   r12, 12 * OR1K_GPRSIZE(sp)
         l.lwz   r13, 13 * OR1K_GPRSIZE(sp)
         l.lwz   r15, 15 * OR1K_GPRSIZE(sp)
         l.lwz   r17, 17 * OR1K_GPRSIZE(sp)
@@ -671,14 +671,12 @@ restore_state:
         l.lwz   r29, 29 * OR1K_GPRSIZE(sp)
         l.lwz   r31, 31 * OR1K_GPRSIZE(sp)
 
-#undef CYGDBG_HAL_COMMON_INTERRUPTS_SAVE_MINIMUM_CONTEXT
 #ifndef CYGDBG_HAL_COMMON_INTERRUPTS_SAVE_MINIMUM_CONTEXT
         # Callee-saved regs don't need to be preserved across a call into
         # an ISR, but we can do so to make debugging easier.
 
         l.lwz   r2,   2 * OR1K_GPRSIZE(sp)
         l.lwz   r10, 10 * OR1K_GPRSIZE(sp)
-        l.lwz   r12, 12 * OR1K_GPRSIZE(sp)
         l.lwz   r14, 14 * OR1K_GPRSIZE(sp)
         l.lwz   r16, 16 * OR1K_GPRSIZE(sp)
         l.lwz   r18, 18 * OR1K_GPRSIZE(sp)
@@ -689,12 +687,12 @@ restore_state:
         l.lwz   r28, 28 * OR1K_GPRSIZE(sp)
         l.lwz   r30, 30 * OR1K_GPRSIZE(sp)
 
+#endif
         # Restore MAC LO and HI regs
         l.lwz   r4, OR1KREG_MACLO(sp)
         l.mtspr r0,r4,SPR_MACLO
         l.lwz   r4, OR1KREG_MACHI(sp)
         l.mtspr r0,r4,SPR_MACHI
-#endif
 
         # Must disable interrupts, since they could clobber ESR and EPC regs
         l.mfspr r3, r0, SPR_SR

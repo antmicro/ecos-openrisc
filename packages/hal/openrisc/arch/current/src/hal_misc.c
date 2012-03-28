@@ -175,7 +175,7 @@ cyg_hal_invoke_constructors(void)
 
 /*------------------------------------------------------------------------*/
 /* Determine the index of the ls bit of the supplied mask.                */
-
+//TODO can we use l.ff1 ?
 cyg_uint32 hal_lsbit_index(cyg_uint32 mask)
 {
     cyg_uint32 n = mask;
@@ -197,7 +197,7 @@ cyg_uint32 hal_lsbit_index(cyg_uint32 mask)
 
 /*------------------------------------------------------------------------*/
 /* Determine the index of the ms bit of the supplied mask.                */
-
+//TODO can we use l.fl1 ?
 cyg_uint32 hal_msbit_index(cyg_uint32 mask)
 {
     cyg_uint32 x = mask;    

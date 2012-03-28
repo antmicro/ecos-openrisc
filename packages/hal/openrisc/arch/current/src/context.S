@@ -70,7 +70,6 @@ FUNC_START(hal_thread_switch_context)
         l.sw     2 * OR1K_GPRSIZE(sp), r2
         l.sw     9 * OR1K_GPRSIZE(sp), r9
         l.sw    10 * OR1K_GPRSIZE(sp), r10
-        l.sw    12 * OR1K_GPRSIZE(sp), r12
         l.sw    14 * OR1K_GPRSIZE(sp), r14
         l.sw    16 * OR1K_GPRSIZE(sp), r16
         l.sw    18 * OR1K_GPRSIZE(sp), r18
@@ -81,7 +80,6 @@ FUNC_START(hal_thread_switch_context)
         l.sw    28 * OR1K_GPRSIZE(sp), r28
         l.sw    30 * OR1K_GPRSIZE(sp), r30
 
-#undef CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
 #ifndef CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
         
         # R0 is not typically stored because it is always zero-valued,
@@ -89,7 +87,7 @@ FUNC_START(hal_thread_switch_context)
         # in the debugger.
         l.sw     0 * OR1K_GPRSIZE(sp), r0
 
-        # Caller-saved regs don't need to be preserved across
+        # Caller-saved temporary regs don't need to be preserved across
         # context switches, but we do so to make debugging easier.
 
         l.sw     3 * OR1K_GPRSIZE(sp), r3
@@ -99,6 +97,7 @@ FUNC_START(hal_thread_switch_context)
         l.sw     7 * OR1K_GPRSIZE(sp), r7
         l.sw     8 * OR1K_GPRSIZE(sp), r8
         l.sw    11 * OR1K_GPRSIZE(sp), r11
+        l.sw    12 * OR1K_GPRSIZE(sp), r12
         l.sw    13 * OR1K_GPRSIZE(sp), r13
         l.sw    15 * OR1K_GPRSIZE(sp), r15
         l.sw    17 * OR1K_GPRSIZE(sp), r17
@@ -110,13 +109,14 @@ FUNC_START(hal_thread_switch_context)
         l.sw    29 * OR1K_GPRSIZE(sp), r29
         l.sw    31 * OR1K_GPRSIZE(sp), r31
 
+#endif
+
         # save MAC LO and HI regs
         l.mfspr r5,r0,SPR_MACLO
         l.sw    OR1KREG_MACLO(sp),r5
         l.mfspr r5,r0,SPR_MACHI
         l.sw    OR1KREG_MACHI(sp),r5
         
-#endif
 
 #ifdef CYGDBG_HAL_DEBUG_GDB_THREAD_SUPPORT
         # Make the thread context look like an exception context if thread-
@@ -155,7 +155,6 @@ FUNC_START(hal_thread_load_context)
         l.lwz   r2,   2 * OR1K_GPRSIZE(sp)
         l.lwz   r9,   9 * OR1K_GPRSIZE(sp)
         l.lwz   r10, 10 * OR1K_GPRSIZE(sp)
-        l.lwz   r12, 12 * OR1K_GPRSIZE(sp)
         l.lwz   r14, 14 * OR1K_GPRSIZE(sp)
         l.lwz   r16, 16 * OR1K_GPRSIZE(sp)
         l.lwz   r18, 18 * OR1K_GPRSIZE(sp)
@@ -176,18 +175,17 @@ FUNC_START(hal_thread_load_context)
         l.or    r5, r5, r6
         l.mtspr r0, r5, SPR_SR
 
-#undef CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
-#ifndef CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
-
-        # Caller-saved regs don't need to be preserved across
-        # context switches, but we do so here to make debugging
-        # easier.
-
         # Restore MAC LO and HI regs
         l.lwz   r5, OR1KREG_MACLO(sp)
         l.mtspr r0,r5,SPR_MACLO
         l.lwz   r5, OR1KREG_MACHI(sp)
         l.mtspr r0,r5,SPR_MACHI
+
+#ifndef CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
+
+        # Caller-saved temporary regs don't need to be preserved across
+        # context switches, but we do so here to make debugging
+        # easier.
 
         l.lwz    r4,  4 * OR1K_GPRSIZE(sp)
         l.lwz    r5,  5 * OR1K_GPRSIZE(sp)
@@ -195,6 +193,7 @@ FUNC_START(hal_thread_load_context)
         l.lwz    r7,  7 * OR1K_GPRSIZE(sp)
         l.lwz    r8,  8 * OR1K_GPRSIZE(sp)
         l.lwz   r11, 11 * OR1K_GPRSIZE(sp)
+        l.lwz   r12, 12 * OR1K_GPRSIZE(sp)
         l.lwz   r13, 13 * OR1K_GPRSIZE(sp)
         l.lwz   r15, 15 * OR1K_GPRSIZE(sp)
         l.lwz   r17, 17 * OR1K_GPRSIZE(sp)

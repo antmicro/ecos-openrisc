@@ -60,12 +60,14 @@
 # define CYG_DOUBLE_BYTEORDER    CYG_MSBFIRST    // Big endian
 
 //-----------------------------------------------------------------------------
-// OpenRISC does not use labels with underscores.
-#define CYG_LABEL_DEFN(_name_) _name_
+// Define label translation
+//
+// (The OpenRISC architecture uses the default 1:1 label translation,
+// so we do not need to define any here.)
 
 //-----------------------------------------------------------------------------
 // Define the standard variable sizes
-
+//
 // (The OpenRISC architecture uses the default definitions of the base types,
 // so we do not need to define any here.)
 
