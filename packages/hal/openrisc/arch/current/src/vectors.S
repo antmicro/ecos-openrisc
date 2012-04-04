@@ -72,7 +72,7 @@
         .extern cyg_start
         .extern _hal_IRQ_init
         .extern hal_platform_init
-        .extern _initialize_stub
+        .extern initialize_stub
 
         .extern __bss_start
         .extern __bss_end
@@ -339,14 +339,12 @@ FUNC_START(start)
         # Hence, it is not safe to access RAM until after this point.
         #hal_hardware_init 
 
-#undef CYGSEM_HAL_ENABLE_ICACHE_ON_STARTUP
-#ifdef CYGSEM_HAL_ENABLE_ICACHE_ON_STARTUP
+#if defined(CYGSEM_HAL_ENABLE_ICACHE_ON_STARTUP) && defined(HAL_ICACHE_SIZE)
         # Enable I-Cache
         hal_icache_init
 #endif
 
-#undef CYGSEM_HAL_ENABLE_DCACHE_ON_STARTUP
-#ifdef CYGSEM_HAL_ENABLE_DCACHE_ON_STARTUP
+#if defined(CYGSEM_HAL_ENABLE_DCACHE_ON_STARTUP) && defined(HAL_DCACHE_SIZE)
         # Enable D-Cache
         hal_dcache_init
 #endif
@@ -426,7 +424,7 @@ hal_hardware_init_done:
         l.nop   # delay slot
 
 #ifdef CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS
-        l.jal   _initialize_stub
+        l.jal   initialize_stub
         l.nop   # delay slot
 #endif
 

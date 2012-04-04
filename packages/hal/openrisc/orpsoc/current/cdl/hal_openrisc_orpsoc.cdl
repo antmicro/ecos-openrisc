@@ -60,10 +60,319 @@ cdl_package CYGPKG_HAL_OPENRISC_ORPSOC {
 
     implements    CYGINT_HAL_VIRTUAL_VECTOR_SUPPORT
     implements    CYGINT_HAL_VIRTUAL_VECTOR_COMM_BAUD_SUPPORT
+    implements    CYGINT_HAL_DEBUG_GDB_STUBS
+    implements    CYGINT_HAL_DEBUG_GDB_STUBS_BREAK
 
     define_proc {
         puts $::cdl_system_header "#define CYGBLD_HAL_TARGET_H   <pkgconf/hal_openrisc.h>"
         puts $::cdl_system_header "#define CYGBLD_HAL_PLATFORM_H <pkgconf/hal_openrisc_orpsoc.h>"
+    }
+
+    cdl_component CYG_HAL_STARTUP {
+        display       "Startup type"
+        flavor        data
+        legal_values  {"RAM" "ROM" "JTAG"}
+        default_value {"JTAG"}
+        no_define
+        define -file system.h CYG_HAL_STARTUP
+        description   "
+            Selects whether code initially runs from ROM or RAM.  In the case of ROM startup,
+            it's possible for the code to be copied into RAM and executed there."
+    }
+
+    cdl_component CYGHWR_MEMORY_LAYOUT {
+        display "Memory layout"
+        flavor data
+        no_define
+        calculated { CYG_HAL_STARTUP == "ROM" ? "openrisc_orpsoc_rom" : \
+                                                "openrisc_orpsoc_ram" }
+
+        cdl_option CYGHWR_MEMORY_LAYOUT_LDI {
+            display "Memory layout linker script fragment"
+            flavor data
+            no_define
+            define -file system.h CYGHWR_MEMORY_LAYOUT_LDI
+            calculated { CYG_HAL_STARTUP == "ROM" ? "<pkgconf/mlt_openrisc_orpsoc_rom.ldi>" : \
+                                                    "<pkgconf/mlt_openrisc_orpsoc_ram.ldi>" }
+        }
+
+        cdl_option CYGHWR_MEMORY_LAYOUT_H {
+            display "Memory layout header file"
+            flavor data
+            no_define
+            define -file system.h CYGHWR_MEMORY_LAYOUT_H
+            calculated { CYG_HAL_STARTUP == "ROM" ? "<pkgconf/mlt_openrisc_orpsoc_rom.h>" : \
+                                                    "<pkgconf/mlt_openrisc_orpsoc_ram.h>" }
+        }
+    }
+
+
+    # Real-time clock/counter specifics
+    cdl_component CYGNUM_HAL_RTC_CONSTANTS {
+        display       "Real-time clock constants."
+        flavor        none
+
+        cdl_option CYGNUM_HAL_RTC_NUMERATOR {
+            display       "Real-time clock numerator"
+            flavor        data
+            default_value 1000000000
+        }
+        cdl_option CYGNUM_HAL_RTC_DENOMINATOR {
+            display       "Real-time clock denominator"
+            flavor        data
+            default_value 100
+        }
+        cdl_option CYGNUM_HAL_RTC_PERIOD {
+            display       "Real-time clock period"
+            flavor        data
+            default_value {CYGHWR_HAL_OPENRISC_CPU_FREQ * 1000000 / CYGNUM_HAL_RTC_DENOMINATOR}
+            description   "
+                The tick timer facility is used
+                to drive the eCos kernel RTC. The count register
+                increments at the CPU clock speed.  By default, 100 Hz"
+        }
+    }
+
+    cdl_component CYGBLD_GLOBAL_OPTIONS {
+        display "Global build options"
+        flavor  none
+        description   "
+            Global build options including control over
+            compiler flags, linker flags and choice of toolchain."
+
+
+        parent  CYGPKG_NONE
+
+        cdl_option CYGBLD_GLOBAL_COMMAND_PREFIX {
+            display "Global command prefix"
+            flavor  data
+            no_define
+            default_value { "or32-elf" }
+            description "
+                This option specifies the command prefix used when
+                invoking the build tools."
+        }
+
+        cdl_option CYGBLD_GLOBAL_CFLAGS {
+            display "Global compiler flags"
+            flavor  data
+            no_define
+            default_value { CYGBLD_GLOBAL_WARNFLAGS .
+                            "-g -O2 -fno-omit-frame-pointer -fno-rtti -fno-exceptions " .
+                            (CYGHWR_MUL_IMPLEMENTED ? "-mhard-mul " : "-msoft-mul ") .
+                            (CYGHWR_DIV_IMPLEMENTED ? "-mhard-div " : "-msoft-div ") .
+                            (CYGHWR_FPU_IMPLEMENTED ? "-mhard-float " : "-msoft-float ") }
+            description   "
+                This option controls the global compiler flags which
+                are used to compile all packages by
+                default. Individual packages may define
+                options which override these global flags."
+        }
+
+        cdl_option CYGBLD_GLOBAL_LDFLAGS {
+            display "Global linker flags"
+            flavor  data
+            no_define
+            default_value { "-g -O2 -nostdlib -Wl,--gc-sections -Wl,-static " .
+                            (CYGHWR_MUL_IMPLEMENTED ? "-mhard-mul " : "-msoft-mul ") .
+                            (CYGHWR_DIV_IMPLEMENTED ? "-mhard-div " : "-msoft-div ") .
+                            (CYGHWR_FPU_IMPLEMENTED ? "-mhard-float " : "-msoft-float ") }
+            description   "
+                This option controls the global linker flags. Individual
+                packages may define options which override these global flags."
+        }
+    }
+
+    cdl_option CYGBLD_BUILD_GDB_STUBS {
+        display "Build GDB stub ROM image"
+        default_value 0
+        parent CYGBLD_GLOBAL_OPTIONS
+        requires { CYG_HAL_STARTUP == "ROM" }
+        requires CYGSEM_HAL_ROM_MONITOR
+        requires CYGBLD_BUILD_COMMON_GDB_STUBS
+        requires CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS
+        requires ! CYGDBG_HAL_DEBUG_GDB_BREAK_SUPPORT
+        requires ! CYGDBG_HAL_DEBUG_GDB_THREAD_SUPPORT
+        requires ! CYGDBG_HAL_COMMON_INTERRUPTS_SAVE_MINIMUM_CONTEXT
+        requires ! CYGDBG_HAL_COMMON_CONTEXT_SAVE_MINIMUM
+        no_define
+        description "
+                This option enables the building of the GDB stubs for the
+                board. The common HAL controls takes care of most of the
+                build process, but the final conversion from ELF image to
+                binary data is handled by the platform CDL, allowing
+                relocation of the data if necessary."
+
+        make -priority 320 {
+            <PREFIX>/bin/gdb_module.bin : <PREFIX>/bin/gdb_module.img
+            $(OBJCOPY) -O binary $< $@
+        }
+    }
+
+    cdl_option CYGNUM_HAL_BREAKPOINT_LIST_SIZE {
+        display       "Number of breakpoints supported by the HAL."
+        flavor        data
+        default_value 25
+        description   "
+            This option determines the number of breakpoints supported by the HAL."
+    }
+
+    cdl_option CYGSEM_HAL_USE_ROM_MONITOR {
+        display       "Work with a ROM monitor"
+        flavor        bool
+        default_value { CYG_HAL_STARTUP == "RAM" ? 1 : 0 }
+        parent        CYGPKG_HAL_ROM_MONITOR
+        requires      { CYG_HAL_STARTUP == "RAM" }
+        description   "
+            Allow coexistence with ROM monitor (CygMon or GDB stubs) by
+            only initializing interrupt vectors on startup, thus leaving
+            exception handling to the ROM monitor."
+    }
+
+    cdl_option CYGSEM_HAL_ROM_MONITOR {
+        display       "Behave as a ROM monitor"
+        flavor        bool
+        default_value 0
+        parent        CYGPKG_HAL_ROM_MONITOR
+        requires      { CYG_HAL_STARTUP == "ROM" }
+        description   "
+            Enable this option if this program is to be used as a ROM monitor,
+            i.e. applications will be loaded into RAM on the board, and this
+            ROM monitor may process exceptions or interrupts generated from the
+            application. This enables features such as utilizing a separate
+            interrupt stack when exceptions are generated."
+    }
+
+    cdl_component CYGPKG_REDBOOT_HAL_OPTIONS {
+        display       "Redboot HAL options"
+        flavor        none
+        no_define
+        parent        CYGPKG_REDBOOT
+        active_if     CYGPKG_REDBOOT
+        description   "
+            This option lists the target's requirements for a valid Redboot
+            configuration."
+
+        cdl_option CYGBLD_BUILD_REDBOOT_BIN {
+            display       "Build Redboot ROM binary image"
+            active_if     CYGBLD_BUILD_REDBOOT
+            default_value 1
+            no_define
+            description "This option enables the conversion of the Redboot ELF
+                         image to a binary image suitable for ROM programming."
+
+            compile -library=libextras.a
+
+            make -priority 325 {
+                <PREFIX>/bin/redboot.srec : <PREFIX>/bin/redboot.elf
+                $(OBJCOPY) --strip-all $< $(@:.srec=.img)
+                $(OBJCOPY) -O srec $< $@
+            }
+        }
+    }
+
+    cdl_option CYGHWR_HAL_OPENRISC_CPU_FREQ {
+        display "CPU frequency"
+        flavor  data
+        legal_values 0 to 1000000
+        default_value 50
+        description "
+           This option contains the frequency of the CPU in MegaHertz.
+           Choose the frequency to match the processor you have. This
+           may affect thing like serial device, interval clock and
+           memory access speed settings."
+    }
+
+    cdl_option CYGHWR_MUL_IMPLEMENTED {
+        display       "Hardware multiplier implemented"
+        flavor        bool
+        default_value 1
+        description   "
+            Select this option only if hardware multiplier is
+            implemented."
+    }
+
+    cdl_option CYGHWR_DIV_IMPLEMENTED {
+        display       "Hardware divisor implemented"
+        flavor        bool
+        default_value 1
+        description   "
+            Select this option only if hardware division is
+            implemented."
+    }
+
+    cdl_option CYGHWR_FPU_IMPLEMENTED {
+        display       "Hardware FPU implemented"
+        flavor        bool
+        default_value 0
+        description   "
+            Select this option only if FPU is implemented."
+    }
+
+    cdl_component CYGHWR_ICACHE_IMPLEMENTED {
+        display       "Instruction cache implemented"
+        flavor        bool
+        default_value 1
+        description   "
+            Select this option only if instruction cache is
+            implemented."
+
+        cdl_option CYGHWR_ICACHE_SIZE {
+            display       "Size of instruction cache"
+            flavor        data
+            legal_values  0x1000 0x2000 0x4000 0x8000
+            default_value 0x2000
+            description   "
+                Size of the instruction cache. Default is 8kB."
+        }
+    }
+
+    cdl_component CYGHWR_DCACHE_IMPLEMENTED {
+        display       "Data cache implemented"
+        flavor        bool
+        default_value 1
+        description   "
+            Select this option only if data cache is
+            implemented."
+
+        cdl_option CYGHWR_DCACHE_SIZE {
+            display       "Size of data cache"
+            active_if     CYGHWR_DCACHE_IMPLEMENTED
+            flavor        data
+            legal_values  0x200 0x1000 0x2000 0x4000 0x8000
+            default_value 0x1000
+            description   "
+                Size of the data cache. Default is 4kB."
+        }
+
+        cdl_option CYGHWR_DCACHE_MODE {
+            display       "DATA cache mode"
+            flavor        data
+            legal_values  { "WRITETHROUGH" "WRITEBACK" }
+            default_value { "WRITETHROUGH" }
+            description   "
+                Speficy synthesized cache."
+        }
+    }
+
+
+
+    cdl_option CYGHWR_RAM_SIZE {
+        display       "Size of RAM memory"
+        flavor        data
+        default_value 0x2000000
+        description   "
+            Size of RAM memory. This value is used to generate linker script.
+            Default is 32MB."
+    }
+
+    cdl_option CYGHWR_ROM_SIZE {
+        display       "Size of ROM memory"
+        flavor        data
+        default_value 0x40000
+        description   "
+            Size of ROM memory. This value is used to generate linker script.
+            Default is 256kB."
     }
 
     cdl_option CYGNUM_HAL_VIRTUAL_VECTOR_CONSOLE_CHANNEL_BAUD {
