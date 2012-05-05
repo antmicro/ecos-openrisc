@@ -1801,6 +1801,14 @@ package CYGPKG_DEVS_ETH_DAVICOM_DM9000 {
         description     "Ethernet driver for Davicom DM9000 controller."
 }
 
+package CYGPKG_DEVS_ETH_OPENCORES_ETHMAC {
+	alias 		{ "OpenCores ETHMAC ethernet driver" ethmac_eth_driver }
+	hardware
+	directory	devs/eth/opencores/ethmac
+	script		opencores_ethmac_eth_drivers.cdl
+        description     "Ethernet driver for OpenCores ETHMAC controller."
+}
+
 package CYGPKG_DEVS_ETH_MIPS_MIPS32_MALTA {
 	alias 		{ "MIPS Malta board ethernet driver" malta_eth_driver }
 	hardware
@@ -6524,6 +6532,8 @@ target ORPSoC {
 	alias 		{ "OpenRISC Reference Platform System-on-Chip" orpsoc }
 	packages	{ CYGPKG_HAL_OPENRISC
 			  CYGPKG_HAL_OPENRISC_ORPSOC
+                          CYGPKG_DEVS_ETH_OPENCORES_ETHMAC
+                          CYGPKG_DEVS_DISK_OPENCORES_SDCMSC
 	}
 	description "
 	   The ORPSoC (OpenRISC Reference Platform System-on-Chip) target 
@@ -6942,6 +6952,13 @@ package CYGPKG_DEVS_DISK_MMC {
     script     devs_disk_mmc.cdl
     hardware
     description "Disk driver for MMC cards"
+}
+
+package CYGPKG_DEVS_DISK_OPENCORES_SDCMSC {
+    alias         { "SDCard Mass Storage Controller" sdcmsc }
+    directory     devs/disk/opencores/sdcmsc
+    script        devs_disk_opencores_sdcmsc.cdl
+    description   "Disk driver for SDCard Mass Storage Controller."
 }
 
 package CYGPKG_DEVS_DISK_MMC_FREESCALE_DSPI {
