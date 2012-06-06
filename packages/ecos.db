@@ -2495,6 +2495,14 @@ package CYGPKG_DEVS_SPI_CORTEXM_A2FXXX {
                  controller family."
 }
 
+package CYGPKG_DEVS_SPI_OPENCORES_SIMPLE_SPI {
+    alias         { "OpenCores simple_spi driver" }
+    hardware
+    directory     devs/spi/opencores/simple_spi
+    script        spi_simple_spi.cdl
+    description "This package provides a driver for the simple_spi peripheral from OpenCores."
+}
+
 package CYGPKG_IO_SPI {
         alias      { "Generic SPI support" spi io_spi spi_io }
         directory  io/spi
@@ -6532,6 +6540,7 @@ target ORPSoC {
 	alias 		{ "OpenRISC Reference Platform System-on-Chip" orpsoc }
 	packages	{ CYGPKG_HAL_OPENRISC
 			  CYGPKG_HAL_OPENRISC_ORPSOC
+                          CYGPKG_DEVS_SPI_OPENCORES_SIMPLE_SPI
                           CYGPKG_DEVS_ETH_OPENCORES_ETHMAC
                           CYGPKG_DEVS_DISK_OPENCORES_SDCMSC
 	}
