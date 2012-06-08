@@ -90,6 +90,42 @@ cdl_package CYGPKG_HAL_OPENRISC {
         @rm target.tmp
     }
 
+    cdl_component CYGPKG_REDBOOT_OPENRISC_OPTIONS {
+        display       "Redboot for OpenRISC options"
+        flavor        none
+        no_define
+        parent        CYGPKG_REDBOOT
+        active_if     CYGPKG_REDBOOT
+        description   "
+            This option lists the target's requirements for a valid Redboot
+            configuration."
+
+        cdl_component CYGPKG_REDBOOT_OPENRISC_LINUX_EXEC {
+            display        "Provide the exec command in RedBoot"
+            flavor         none
+            parent         CYGPKG_REDBOOT_OPENRISC_OPTIONS
+            active_if      CYGBLD_BUILD_REDBOOT_WITH_EXEC
+            description    "
+                This option contains requirements for booting linux
+                from RedBoot. The component is enabled/disabled from
+                RedBoots CDL."
+            compile -library=libextras.a redboot_linux_exec.c
+
+            cdl_option CYGPKG_REDBOOT_OPENRISC_TRAMPOLINE_ADDRESS {
+                display       "Base address of the trampoline code"
+                flavor        data
+                default_value 0x01000000
+                description   "
+                   This is the base address of the trampoline code.
+                   It is OK to set this at the end of the RAM.
+                   Trampoline code may overwrite stack, there is 
+                   nothing wrong with that."
+            }
+        }
+
+    }
+
+
 }
 
 # EOF hal_openrisc.cdl
