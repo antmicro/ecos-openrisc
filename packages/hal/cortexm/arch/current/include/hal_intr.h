@@ -47,7 +47,8 @@
 //
 //####DESCRIPTIONEND####
 //
-//========================================================================*/
+//========================================================================
+*/
 
 #include <pkgconf/system.h>
 #include <pkgconf/hal.h>
@@ -71,7 +72,7 @@
 #define CYGNUM_HAL_VECTOR_MEMORY_MAN     4      // Memory management (M3)
 #define CYGNUM_HAL_VECTOR_BUS_FAULT      5      // Bus Fault
 #define CYGNUM_HAL_VECTOR_USAGE_FAULT    6      // Usage Fault
-#define CYGNUM_HAL_VECTOR_RESERVED_07    7      
+#define CYGNUM_HAL_VECTOR_RESERVED_07    7
 #define CYGNUM_HAL_VECTOR_RESERVED_08    8
 #define CYGNUM_HAL_VECTOR_RESERVED_09    9
 #define CYGNUM_HAL_VECTOR_RESERVED_10   10
@@ -168,7 +169,7 @@ CYG_MACRO_END
 //
 // Interrupt handler/data/object tables plus functions and macros to
 // manipulate them.
- 
+
 __externC volatile CYG_ADDRESS   hal_interrupt_handlers[CYGNUM_HAL_ISR_COUNT];
 __externC volatile CYG_ADDRWORD  hal_interrupt_data    [CYGNUM_HAL_ISR_COUNT];
 __externC volatile CYG_ADDRESS   hal_interrupt_objects [CYGNUM_HAL_ISR_COUNT];
@@ -367,6 +368,16 @@ __externC cyg_uint32 hal_cortexm_systick_clock;
     *(__pvalue) = __value;                                              \
 }
 
+#define HAL_CLOCK_READ_NS( __pvalue )                                              \
+CYG_MACRO_START                                                                                  \
+    cyg_uint32 __period, __value;                                                  \
+    HAL_READ_UINT32(CYGARC_REG_SYSTICK_BASE+CYGARC_REG_SYSTICK_RELOAD, __period ); \
+    HAL_READ_UINT32(CYGARC_REG_SYSTICK_BASE+CYGARC_REG_SYSTICK_VALUE, __value );   \
+    __value = (( __period + 1 ) - __value) * 1000;                                          \
+    __value /= (hal_cortexm_systick_clock / 1000000 );                  \
+    *(__pvalue) = __value;                                                         \
+CYG_MACRO_END
+
 #define HAL_CLOCK_LATENCY( __pvalue ) HAL_CLOCK_READ( __pvalue )
 
 #endif // CYGHWR_HAL_CLOCK_DEFINED
@@ -396,4 +407,3 @@ __externC void hal_reset_vsr( void );
 
 //==========================================================================
 #endif //CYGONCE_HAL_INTR_H
-

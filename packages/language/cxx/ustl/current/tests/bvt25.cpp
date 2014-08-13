@@ -1,9 +1,19 @@
 // This file is part of the uSTL library, an STL implementation.
 //
-// Copyright (c) 2005-2009 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 2005 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include "stdtest.h"
+
+#ifdef CYGIMP_USTL_TESTS_BVT25_ROMFS
+# include <cyg/fileio/fileio.h>
+# if (CYG_BYTEORDER == CYG_LSBFIRST)
+#  include <cyg/ustl/bvt25fs_le.h>
+# else
+#  include <cyg/ustl/bvt25fs_be.h>
+# endif
+MTAB_ENTRY(romfs_mte1, "/", "romfs", "", (CYG_ADDRWORD) &filedata[0]);
+#endif
 
 void TestFStream (void)
 {

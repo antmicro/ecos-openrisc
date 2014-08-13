@@ -1,6 +1,6 @@
 // This file is part of the uSTL library, an STL implementation.
 //
-// Copyright (c) 2005-2009 by Mike Sharov <msharov@users.sourceforge.net>
+// Copyright (c) 2005 by Mike Sharov <msharov@users.sourceforge.net>
 // This file is free software, distributed under the MIT License.
 
 #include "stdtest.h"
@@ -22,7 +22,7 @@ void TestUTF8 (void)
 {
     cout << "Generating Unicode characters ";
     vector<wchar_t> srcChars;
-    srcChars.resize (0xFFFF);
+    srcChars.resize (0xFFF);
     iota (srcChars.begin(), srcChars.end(), 0);
     cout.format ("%zu - %zu\n", size_t(srcChars[0]), size_t(srcChars.back()));
 

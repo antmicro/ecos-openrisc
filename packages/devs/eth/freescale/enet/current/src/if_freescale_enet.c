@@ -6,7 +6,7 @@
 // ####ECOSGPLCOPYRIGHTBEGIN####                                            
 // -------------------------------------------                              
 // This file is part of eCos, the Embedded Configurable Operating System.   
-// Copyright (C) 2011 Free Software Foundation, Inc.                        
+// Copyright (C) 2011, 2013 Free Software Foundation, Inc.                        
 //
 // eCos is free software; you can redistribute it and/or modify it under    
 // the terms of the GNU General Public License as published by the Free     
@@ -84,6 +84,9 @@
 #include <cyg/io/eth/if_freescale_enet_bd.h>
 #include <cyg/io/eth/if_freescale_enet_io.h>
 
+#if defined CYGHWR_HAL_ENET_TCD_SECTION || defined CYGHWR_HAL_ENET_BUF_SECTION
+# include <cyg/infra/cyg_type.h>
+#endif
 // Some debugging helpers ---------------------------------------------------
 
 #define DEBUG_ENET CYGPKG_DEVS_ETH_FREESCALE_ENET_DEBUG_LEVEL
@@ -142,13 +145,19 @@
 // Resources provided by HAL ==============================================
 // Ethernet RAM and DMA configuration --------------------------------------
 
-#ifdef CYGHWR_HAL_ENET_MEM_SECTION
-# include <cyg/infra/cyg_type.h>
-# define ENET_RAM_MEM_SECTION CYGBLD_ATTRIB_SECTION(CYGHWR_HAL_ENET_MEM_SECTION)
+// Buffer descriptor memory section
+#ifdef CYGHWR_HAL_ENET_TCD_SECTION
+# define ENET_RAM_TCD_SECTION CYGBLD_ATTRIB_SECTION(CYGHWR_HAL_ENET_TCD_SECTION)
 #else
-# define ENET_RAM_MEM_SECTION
-#endif // CYGHWR_HAL_ENET_MEM_SECTION
+# define ENET_RAM_TCD_SECTION
+#endif // CYGHWR_HAL_ENET_TCD_SECTION
 
+// Buffer memory section
+#ifdef CYGHWR_HAL_ENET_BUF_SECTION
+# define ENET_RAM_BUF_SECTION CYGBLD_ATTRIB_SECTION(CYGHWR_HAL_ENET_BUF_SECTION)
+#else
+# define ENET_RAM_BUF_SECTION
+#endif // CYGHWR_HAL_ENET_BUF_SECTION
 
 // IRQ masking --------------------------------------------------------------
 //
@@ -310,6 +319,7 @@ typedef struct freescale_enet_priv_t {
     cyg_uint32 *txkey_head_p;             // Last Txkey entry
     cyg_uint32 *txkey_tail_p;             // Last Txkey released
 #endif // CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
+    cyg_uint32 clock;                     // Clock gating
     const cyg_uint32 *pins_p;             // (R)MII pin configuration data
     cyg_uint8 *enaddr;                    // Default ethernet (MAC) address
     cyg_uint32 rx_intr_vector;
@@ -396,24 +406,24 @@ static const cyg_uint32 const enet0_pins[] = {
 
 // Buffer descriptors
 enet_bd_t enet0_rxbd_pool[CYGNUM_DEVS_ETH_FREESCALE_ENET0_RX_BUFS]
-ENET_RAM_MEM_SECTION ENET_RXBD_ALIGN;
+ENET_RAM_TCD_SECTION ENET_RXBD_ALIGN;
 enet_bd_t enet0_txbd_pool[CYGNUM_DEVS_ETH_FREESCALE_ENET0_TX_BUFS]
-                         ENET_RAM_MEM_SECTION ENET_TXBD_ALIGN;
+                         ENET_RAM_TCD_SECTION ENET_TXBD_ALIGN;
 
 #ifdef CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
 // Tx key queue
 cyg_uint32 enet0_txkey_pool[CYGNUM_DEVS_ETH_FREESCALE_ENET0_TX_BUFS]
-                         ENET_RAM_MEM_SECTION;
+                         ENET_RAM_TCD_SECTION;
 #endif // CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
 
 // Buffers
 cyg_uint8 enet0_rxbuf[CYGNUM_DEVS_ETH_FREESCALE_ENET0_RX_BUFS *
                       CYGNUM_DEVS_ETH_FREESCALE_ENET0_RXBUF_SIZE]
-                      ENET_RAM_MEM_SECTION ENET_RXBUF_ALIGN;
+                      ENET_RXBUF_ALIGN ENET_RAM_BUF_SECTION;
 #ifndef CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
 cyg_uint8 enet0_txbuf[CYGNUM_DEVS_ETH_FREESCALE_ENET0_TX_BUFS *
                       CYGNUM_DEVS_ETH_FREESCALE_ENET0_TXBUF_SIZE]
-                      ENET_RAM_MEM_SECTION ENET_TXBUF_ALIGN;
+                      ENET_TXBUF_ALIGN ENET_RAM_BUF_SECTION;
 #endif //  CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
 
 #ifdef  CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
@@ -465,6 +475,7 @@ freescale_enet_priv_t enet0_eth0_priv = {
     .txbuf_size   = CYGNUM_DEVS_ETH_FREESCALE_ENET0_TXBUF_SIZE,
     .txbuf_p      = enet0_txbuf,
 #endif //  CYGOPT_ETH_FREESCALE_ENET_TX_NOCOPY
+    .clock       = CYGHWR_IO_FREESCALE_ENET0_CLOCK,
     .pins_p      = enet0_pins,
     .pins_n      = sizeof(enet0_pins)/sizeof(enet0_pins[0]),
     .enaddr   = enet0_macaddr,
@@ -734,6 +745,9 @@ enet_eth_init(struct cyg_netdevtab_entry *tab)
 #ifdef CYGHWR_DEVS_ETH_FREESCALE_ENET_GET_ESA
     bool esa_ok = false;
 #endif
+    // Bring clock to the sevice
+    CYGHWR_IO_CLOCK_ENABLE(enet_priv_p->clock);
+    // Assign pins
     enet_cfg_pins(enet_priv_p);
 
     HAL_WRITE_UINT32(enet_base + FREESCALE_ENET_REG_EIMR, 0);
