@@ -1,0 +1,50 @@
+.
+├── arch
+│   └── current
+│       ├── cdl
+│       │   └── hal_openrisc.cdl
+│       ├── ChangeLog
+│       ├── doc
+│       │   └── README.html
+│       ├── include
+│       │   ├── arch.inc
+│       │   ├── basetype.h
+│       │   ├── hal_arch.h
+│       │   ├── hal_cache.h
+│       │   ├── hal_intr.h
+│       │   ├── hal_io.h
+│       │   ├── openrisc.inc
+│       │   ├── openrisc_opcode.h
+│       │   ├── openrisc_stub.h
+│       │   └── spr_defs.h
+│       └── src
+│           ├── context.S
+│           ├── hal_misc.c
+│           ├── openrisc.ld
+│           ├── openrisc_stub.c
+│           ├── redboot_linux_exec.c
+│           └── vectors.S
+├── orpsoc
+│   └── current
+│       ├── cdl
+│       │   └── hal_openrisc_orpsoc.cdl
+│       ├── ChangeLog
+│       ├── doc
+│       │   └── README.html
+│       ├── include
+│       │   ├── hal_diag.h
+│       │   ├── mc.h
+│       │   ├── pkgconf
+│       │   │   ├── mlt_openrisc_orpsoc_ram.h
+│       │   │   ├── mlt_openrisc_orpsoc_ram.ldi
+│       │   │   ├── mlt_openrisc_orpsoc_rom.h
+│       │   │   └── mlt_openrisc_orpsoc_rom.ldi
+│       │   ├── plf_cache.h
+│       │   ├── plf_intr.h
+│       │   └── plf_stub.h
+│       └── src
+│           ├── hal_aux.c
+│           └── hal_diag.c
+└── tree
+
+13 directories, 34 files

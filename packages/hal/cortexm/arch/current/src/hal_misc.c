@@ -8,7 +8,7 @@
 // ####ECOSGPLCOPYRIGHTBEGIN####                                            
 // -------------------------------------------                              
 // This file is part of eCos, the Embedded Configurable Operating System.   
-// Copyright (C) 2008 Free Software Foundation, Inc.                        
+// Copyright (C) 2008, 2012 Free Software Foundation, Inc.                        
 //
 // eCos is free software; you can redistribute it and/or modify it under    
 // the terms of the GNU General Public License as published by the Free     
@@ -39,12 +39,14 @@
 //==========================================================================
 //#####DESCRIPTIONBEGIN####
 //
-// Author(s):    nickg
-// Date:         2008-07-30
+// Author(s):      nickg
+// Contributor(s): ilijak
+// Date:           2008-07-30
 //
 //####DESCRIPTIONEND####
 //
-//========================================================================*/
+//========================================================================
+*/
 
 #include <pkgconf/hal.h>
 #include <pkgconf/hal_cortexm.h>
@@ -59,9 +61,12 @@
 
 #include <cyg/hal/hal_arch.h>           // HAL header
 #include <cyg/hal/hal_intr.h>           // HAL header
-
+#include <cyg/hal/cortexm_regs.h>       // Special Cortex-M asm instructions
 #include <cyg/hal/drv_api.h>
 
+#ifdef CYGHWR_HAL_CORTEXM_FPU
+#include <cyg/hal/cortexm_fpu.h>        // Optional Floating Point Unit
+#endif
 
 #if defined(CYGPKG_KERNEL_INSTRUMENT) &&        \
     defined(CYGDBG_KERNEL_INSTRUMENT_INTR)
@@ -81,6 +86,9 @@ __externC void hal_default_interrupt_vsr( void );
 __externC void hal_default_svc_vsr( void );
 __externC void hal_pendable_svc_vsr( void );
 __externC void hal_switch_state_vsr( void );
+#ifdef CYGHWR_HAL_CORTEXM_FPU_SWITCH_LAZY
+__externC void hal_usagefault_exception_vsr( void );
+#endif
 
 // HAL and eCos functions
 __externC void hal_system_init( void );
@@ -128,9 +136,14 @@ void hal_reset_vsr( void )
     // usually supplied by the platform HAL. Calls to
     // hal_variant_init() and hal_platform_init() later will perform
     // the main initialization.
-    
+
     hal_system_init();
-    
+#if defined CYGHWR_HAL_CORTEXM_FPU
+    // Floating Point Unit is disabled after reset.
+    // Enable it unless for LAZY context switching scheme.
+    hal_init_fpu();
+#endif
+
     // Initialize vector table in base of SRAM.
     {
         register int i;
@@ -140,23 +153,26 @@ void hal_reset_vsr( void )
         // Only install the exception vectors for non-RAM startup. For
         // RAM startup we want these to continue to point to the original
         // VSRs, which will belong to RedBoot or GDB stubs.
-        
+
         for( i = 2; i < 15; i++ )
             hal_vsr_table[i] = (CYG_ADDRESS)hal_default_exception_vsr;
-
-#endif
+#endif // !defined(CYG_HAL_STARTUP_RAM)
         // Always point SVC and PENDSVC vectors to our local versions
-        
+
         hal_vsr_table[CYGNUM_HAL_VECTOR_SERVICE] = (CYG_ADDRESS)hal_default_svc_vsr;
         hal_vsr_table[CYGNUM_HAL_VECTOR_PENDSV] = (CYG_ADDRESS)hal_pendable_svc_vsr;
+#ifdef CYGHWR_HAL_CORTEXM_FPU_SWITCH_LAZY
+        // Install UsageFault and HardFault to trap the FPU usage exceptions.
+        HAL_VSR_SET(CYGNUM_HAL_VECTOR_USAGE_FAULT, hal_usagefault_exception_vsr, NULL);
+        HAL_VSR_SET(CYGNUM_HAL_VECTOR_HARD_FAULT, hal_usagefault_exception_vsr, NULL);
+#endif // CYGHWR_HAL_CORTEXM_FPU_SWITCH_LAZY
 
         // For all startup type, redirect interrupt vectors to our VSR.
         for( i = CYGNUM_HAL_VECTOR_SYS_TICK ;
-             i < CYGNUM_HAL_VECTOR_SYS_TICK + CYGNUM_HAL_VSR_MAX;
+             i < CYGNUM_HAL_VSR_MAX;
              i++ )
             hal_vsr_table[i] = (CYG_ADDRESS)hal_default_interrupt_vsr;
     }
-
 
 #if !defined(CYG_HAL_STARTUP_RAM)
 
@@ -167,11 +183,11 @@ void hal_reset_vsr( void )
 
     // On M3 and M4 parts, the NVIC contains a vector table base register.
     // We program this to relocate the vector table base to the base of SRAM.
-    
+
     HAL_WRITE_UINT32( CYGARC_REG_NVIC_BASE+CYGARC_REG_NVIC_VTOR,
                       CYGARC_REG_NVIC_VTOR_TBLOFF(0)|
                       CYGARC_REG_NVIC_VTOR_TBLBASE_SRAM );
-    
+
 # else
 
 #  error Unknown SRAM/VECTAB remap mechanism
@@ -182,14 +198,14 @@ void hal_reset_vsr( void )
     // We don't need to do this for RAM startup since the ROM code
     // will have already done it.
 
-    hal_vsr_table[CYGNUM_HAL_VECTOR_SERVICE] = (CYG_ADDRESS)hal_switch_state_vsr;    
+    hal_vsr_table[CYGNUM_HAL_VECTOR_SERVICE] = (CYG_ADDRESS)hal_switch_state_vsr;
 
     __asm__ volatile( "swi 0" );
 
     hal_vsr_table[CYGNUM_HAL_VECTOR_SERVICE] = (CYG_ADDRESS)hal_default_svc_vsr;
-    
+
 #endif // !defined(CYG_HAL_STARTUP_RAM)
-    
+
 #if defined(CYG_HAL_STARTUP_ROM)
     // Relocate data from ROM to RAM
     {
@@ -223,13 +239,13 @@ void hal_reset_vsr( void )
     // PendSVC which are lowest priority.
     {
         register int i;
-        
+
         HAL_WRITE_UINT32( CYGARC_REG_NVIC_BASE+CYGARC_REG_NVIC_SHPR0, 0x00000000 );
         HAL_WRITE_UINT32( CYGARC_REG_NVIC_BASE+CYGARC_REG_NVIC_SHPR1, 0xFF000000 );
         HAL_WRITE_UINT32( CYGARC_REG_NVIC_BASE+CYGARC_REG_NVIC_SHPR2, 0x00FF0000 );
-        
+
         hal_interrupt_handlers[CYGNUM_HAL_INTERRUPT_SYS_TICK] = (CYG_ADDRESS)hal_default_isr;
-        
+
         for( i = 1; i < CYGNUM_HAL_ISR_COUNT; i++ )
         {
             hal_interrupt_handlers[i] = (CYG_ADDRESS)hal_default_isr;
@@ -251,7 +267,7 @@ void hal_reset_vsr( void )
     }
 #endif
 
-#if !defined(CYG_HAL_STARTUP_RAM)    
+#if !defined(CYG_HAL_STARTUP_RAM)
     // Enable Usage, Bus and Mem fault handlers. Do this for ROM and
     // JTAG startups. For RAM startups, this will have already been
     // done by the ROM monitor.
@@ -266,25 +282,25 @@ void hal_reset_vsr( void )
         HAL_WRITE_UINT32( base+CYGARC_REG_NVIC_SHCSR, shcsr );
     }
 #endif
-    
+
     // Call variant and platform init routines
     hal_variant_init();
     hal_platform_init();
 
     // Start up the system clock
     HAL_CLOCK_INITIALIZE( CYGNUM_HAL_RTC_PERIOD );
-            
+
 #ifdef CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS
-    
+
     initialize_stub();
-    
+
 #endif
 
 #if defined(CYGDBG_HAL_DEBUG_GDB_CTRLC_SUPPORT) || \
     defined(CYGDBG_HAL_DEBUG_GDB_BREAK_SUPPORT)
-    
+
     hal_ctrlc_isr_init();
-    
+
 #endif
 
     // Run through static constructors
@@ -315,11 +331,12 @@ void hal_deliver_exception( HAL_SavedRegisters *regs )
     // This is common in discovery code, e.g. checking for a particular
     // device which may generate an exception when probing if the
     // device is not present
+
 #ifdef CYGDBG_HAL_DEBUG_GDB_INCLUDE_STUBS
     if (__mem_fault_handler )
     {
         regs->u.exception.pc = (unsigned long)__mem_fault_handler;
-        return; // Caught an exception inside stubs        
+        return; // Caught an exception inside stubs
     }
 #endif
 
@@ -335,8 +352,8 @@ void hal_deliver_exception( HAL_SavedRegisters *regs )
 #else
 
     CYG_FAIL("Exception!!!");
-    
-#endif    
+
+#endif
 }
 
 //==========================================================================
@@ -356,14 +373,13 @@ void hal_deliver_interrupt( cyg_uint32 vector )
     register cyg_uint32 isr_result;
     register cyg_isr *isr;
     cyg_bool pendsvc = false;
-    
+
 #if defined(CYGPKG_KERNEL_INSTRUMENT) && \
     defined(CYGDBG_KERNEL_INSTRUMENT_INTR)
     CYG_INSTRUMENT_INTR(RAISE, vector, 0);
 #endif
-
     isr = (cyg_isr *)hal_interrupt_handlers[vector];
-    
+
     // Call the ISR
     isr_result = isr( vector, hal_interrupt_data[vector] );
 
@@ -413,10 +429,10 @@ void hal_deliver_interrupt( cyg_uint32 vector )
 
 __externC void hal_interrupt_end( void )
 {
-#ifdef CYGFUN_HAL_COMMON_KERNEL_SUPPORT    
+#ifdef CYGFUN_HAL_COMMON_KERNEL_SUPPORT
     cyg_scheduler_sched_lock++;
 #endif
-    
+
    interrupt_end(0,0,0);
 }
 
@@ -521,7 +537,7 @@ __externC void hal_delay_us( cyg_int32 us )
         if( t1 < t0 )
             us -= (t1 + CYGNUM_HAL_RTC_PERIOD - t0);
         else
-        	us -= t1 - t0;
+            us -= t1 - t0;
         t0 = t1;
     }
 }
@@ -546,7 +562,7 @@ cyg_hal_invoke_constructors (void)
 {
 #ifdef CYGSEM_HAL_STOP_CONSTRUCTORS_ON_FLAG
     static pfunc *p = &CONSTRUCTORS_START;
-    
+
     cyg_hal_stop_constructors = 0;
     for (; p != CONSTRUCTORS_END; NEXT_CONSTRUCTOR(p)) {
         (*p)();
@@ -585,9 +601,8 @@ hal_arch_default_isr(CYG_ADDRWORD vector, CYG_ADDRWORD data)
 __externC void hal_get_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_SavedRegisters *regs )
 {
     int i;
-    cyg_uint32 *p = gdbreg->f0;
-    
-    switch( regs->u.type )
+
+    switch(GDB_STUB_SAVEDREG_FRAME_TYPE(regs))
     {
     case HAL_SAVEDREGISTERS_THREAD:
         for( i = 0; i < 13; i++ )
@@ -595,9 +610,11 @@ __externC void hal_get_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         gdbreg->gpr[13] = regs->u.thread.sp;
         gdbreg->gpr[14] = regs->u.thread.pc;
         gdbreg->gpr[15] = regs->u.thread.pc;
-        gdbreg->ps = 0x01000000;
+        gdbreg->xpsr = 0x01000000;
+
+        GDB_STUB_SAVEDREG_FPU_THREAD_GET(gdbreg, regs);
         break;
-            
+
     case HAL_SAVEDREGISTERS_EXCEPTION:
         gdbreg->gpr[0] = regs->u.exception.r0;
         gdbreg->gpr[1] = regs->u.exception.r1;
@@ -609,9 +626,12 @@ __externC void hal_get_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         gdbreg->gpr[13] = ((cyg_uint32)regs)+sizeof(regs->u.exception);
         gdbreg->gpr[14] = regs->u.exception.lr;
         gdbreg->gpr[15] = regs->u.exception.pc;
-        gdbreg->ps = regs->u.exception.psr;
+        gdbreg->xpsr = regs->u.exception.psr;
+#ifdef  CYGSEM_HAL_DEBUG_FPU
+        GDB_STUB_SAVEDREG_FPU_EXCEPTION_GET(gdbreg, regs);
+#endif
         break;
-                
+
     case HAL_SAVEDREGISTERS_INTERRUPT:
         gdbreg->gpr[0] = regs->u.interrupt.r0;
         gdbreg->gpr[1] = regs->u.interrupt.r1;
@@ -621,21 +641,24 @@ __externC void hal_get_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         gdbreg->gpr[13] = ((cyg_uint32)regs)+sizeof(regs->u.interrupt);
         gdbreg->gpr[14] = regs->u.interrupt.lr;
         gdbreg->gpr[15] = regs->u.interrupt.pc;
-        gdbreg->ps = regs->u.interrupt.psr;
+        gdbreg->xpsr = regs->u.interrupt.psr;
         break;
     }
-
+#ifdef CYGARC_CORTEXM_GDB_REG_FPA
     // Clear FP state, which we don't use
-    for( i = 0; i < (8*3+1); i++ )
-        p[i] = 0;
-    
+    {
+        cyg_uint32 *p = gdbreg->f0;
+        for( i = 0; i < (8*3+1); i++ )
+            p[i] = 0;
+    }
+#endif
 }
 
 __externC void hal_set_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_SavedRegisters *regs )
 {
     int i;
-    
-    switch( regs->u.type )
+
+    switch(GDB_STUB_SAVEDREG_FRAME_TYPE(regs))
     {
     case HAL_SAVEDREGISTERS_THREAD:
         for( i = 0; i < 13; i++ )
@@ -643,8 +666,10 @@ __externC void hal_set_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         regs->u.thread.sp = gdbreg->gpr[13];
         regs->u.thread.pc = gdbreg->gpr[14];
         regs->u.thread.pc = gdbreg->gpr[15];
+
+        GDB_STUB_SAVEDREG_FPU_THREAD_SET(gdbreg, regs);
         break;
-            
+
     case HAL_SAVEDREGISTERS_EXCEPTION:
         regs->u.exception.r0 = gdbreg->gpr[0];
         regs->u.exception.r1 = gdbreg->gpr[1];
@@ -655,9 +680,12 @@ __externC void hal_set_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         regs->u.exception.r12 = gdbreg->gpr[12];
         regs->u.exception.lr = gdbreg->gpr[14];
         regs->u.exception.pc = gdbreg->gpr[15];
-        regs->u.exception.psr = gdbreg->ps;
+        regs->u.exception.psr = gdbreg->xpsr;
+#ifdef  CYGSEM_HAL_DEBUG_FPU
+        GDB_STUB_SAVEDREG_FPU_EXCEPTION_SET(gdbreg, regs);
+#endif
         break;
-                
+
     case HAL_SAVEDREGISTERS_INTERRUPT:
         regs->u.interrupt.r0 = gdbreg->gpr[0];
         regs->u.interrupt.r1 = gdbreg->gpr[1];
@@ -666,7 +694,7 @@ __externC void hal_set_gdb_registers( HAL_CORTEXM_GDB_Registers *gdbreg, HAL_Sav
         regs->u.interrupt.r12 = gdbreg->gpr[12];
         regs->u.interrupt.lr = gdbreg->gpr[14];
         regs->u.interrupt.pc = gdbreg->gpr[15];
-        regs->u.interrupt.psr = gdbreg->ps;
+        regs->u.interrupt.psr = gdbreg->xpsr;
         break;
     }
 }

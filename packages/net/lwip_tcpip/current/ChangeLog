@@ -1,3 +1,21 @@
+2013-03-03  Mike Jones  <mike@proclivis.com>
+
+	* src/core/snmp/msg_out.c: Applied lwip bugfix #29256.
+	ip_addr_set_hton(...) does not exist in this revision,
+	so an equivalent solution was provided. The application
+	was retested. Any application that worked around the problem by
+	using htonl(...) will need to be changed by removing it.
+	[ Bugzilla 1001789 ]
+
+2012-05-26  Ilija Kocho  <ilijak@siva.com.mk>
+
+	* tests/nc_test_slave.c: Reduced stack sizes of IDLE, LOAD and TMAIN
+	threads as well as NUM_LOAD_THREADS to 5 (was 10) in order to fit the
+	test for targets with as low as 128KiB RAM.
+	Bug fix: MAX_BUF fixed so that in_buf[] and out_buf[] can accomodate
+	10KiB messages.
+	[ Bugzilla 1001344 ]
+
 2012-03-06  Ilija Kocho  <ilijak@siva.com.mk>
 
     * src/core/tcp_out.c: Fix compiler warning about unused variables.

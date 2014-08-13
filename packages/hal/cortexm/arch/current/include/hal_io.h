@@ -47,7 +47,8 @@
 //
 //####DESCRIPTIONEND####
 //
-//========================================================================*/
+//========================================================================
+*/
 
 #include <pkgconf/system.h>
 #include <pkgconf/hal.h>
@@ -215,6 +216,16 @@
 #define CYGARC_REG_NVIC_SHCSR_BUSFAULTACT       BIT_(1)
 #define CYGARC_REG_NVIC_SHCSR_MEMFAULTACT       BIT_(0)
 
+// Usage Fault register
+
+#define CYGARC_REG_UFSR                         0xE000ED2A
+#define CYGARC_REG_UFSR_DIVBYZERO               BIT_(9)
+#define CYGARC_REG_UFSR_UNALIGNED               BIT_(8)
+#define CYGARC_REG_UFSR_NOCP                    BIT_(3)
+#define CYGARC_REG_UFSR_INVPC                   BIT_(2)
+#define CYGARC_REG_UFSR_INVSTATE                BIT_(1)
+#define CYGARC_REG_UFSR_UNDEFINSTR              BIT_(0)
+
 #endif
 
 //==========================================================================
@@ -318,7 +329,7 @@ typedef volatile CYG_ADDRWORD HAL_IO_REGISTER;
 //-----------------------------------------------------------------------------
 // 16 bit access.
 // Individual and vectorized access to 16 bit registers.
-    
+
 
 #define HAL_READ_UINT16( _register_, _value_ ) \
         ((_value_) = *((volatile CYG_WORD16 *)(_register_)))
@@ -397,7 +408,7 @@ typedef volatile CYG_ADDRWORD HAL_IO_REGISTER;
 
 #endif // !HAL_IO_MACROS_DEFINED
 
-// Enforce a flow "barrier" to prevent optimizing compiler from reordering 
+// Enforce a flow "barrier" to prevent optimizing compiler from reordering
 // operations.
 #define HAL_IO_BARRIER()
 
