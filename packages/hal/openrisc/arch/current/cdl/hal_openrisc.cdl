@@ -59,7 +59,7 @@ cdl_package CYGPKG_HAL_OPENRISC {
         for this processor architecture. It is also necessary to
         select a specific target platform HAL package."
 
-    compile       context.S vectors.S hal_misc.c openrisc_stub.c
+    compile       context.S hal_misc.c openrisc_stub.c
 
     make {
         <PREFIX>/lib/vectors.o : <PACKAGE>/src/vectors.S

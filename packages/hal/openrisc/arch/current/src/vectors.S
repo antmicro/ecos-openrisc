@@ -68,7 +68,7 @@
         .extern hal_vsr_table
 
         .extern cyg_hal_invoke_constructors
-        .extern _cyg_instrument
+        .extern cyg_instrument
         .extern cyg_start
         .extern _hal_IRQ_init
         .extern hal_platform_init
@@ -521,13 +521,13 @@ FUNC_START(cyg_hal_default_interrupt_vsr)
 
         # Call C code
 
+
 #if defined(CYGPKG_KERNEL_INSTRUMENT) && defined(CYGDBG_KERNEL_INSTRUMENT_INTR)
         # Log the interrupt if kernel tracing is enabled
         l.ori   r3,r0,0x0301                    # arg1 = type = INTR,RAISE
                                                 # arg2 = vector number
-        l.ori   r5,r0,r0                        # arg3 = 0
-        l.jal   _cyg_instrument                  # call instrument function
-        
+        l.or   r5,r0,r0                         # arg3 = 0
+        l.jal   cyg_instrument                 # call instrument function
 #endif
 
 #if defined(CYGDBG_HAL_DEBUG_GDB_CTRLC_SUPPORT) \
