@@ -1374,6 +1374,15 @@ package CYGPKG_IO_SERIAL_SH_SCIF {
     description       "SH SCIF serial device drivers"
 }
 
+package CYGPKG_DEVS_SERIAL_OPENCORES_16550 {
+    alias         { "OpenCores simple_serial driver"
+                    devs_serial_opencores_simple simple_serial_driver }
+    hardware
+    directory     devs/serial/opencores/16550
+    script        opencores_16550.cdl
+    description   "This package provides the 16550 based serial driver."
+}
+
 package CYGPKG_DEVS_ETH_PHY {
 	alias 		{ "Generic PHY support" eth_phy_support }
 	hardware
@@ -6573,6 +6582,8 @@ target ORPSoC {
                           CYGPKG_DEVS_SPI_OPENCORES_SIMPLE_SPI
                           CYGPKG_DEVS_ETH_OPENCORES_ETHMAC
                           CYGPKG_DEVS_DISK_OPENCORES_SDCMSC
+                          CYGPKG_IO_SERIAL_GENERIC_16X5X
+                          CYGPKG_DEVS_SERIAL_OPENCORES_16550
 	}
 	description "
 	   The ORPSoC (OpenRISC Reference Platform System-on-Chip) target 
