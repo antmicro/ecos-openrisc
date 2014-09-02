@@ -31,8 +31,7 @@ static unsigned short select_baud[] = {
 #ifdef CYGPKG_IO_SERIAL_OPENCORES_SERIAL0
 
 static pc_serial_info pc_serial_info0 = {CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_IOBASE,
-                                         CYGNUM_HAL_INTERRUPT_SERIAL_CONSOLE};
-                                         //CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_INT};
+                                         CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_INT};
 
 
 #if CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_BUFSIZE > 0

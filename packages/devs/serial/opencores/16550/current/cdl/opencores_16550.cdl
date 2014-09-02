@@ -33,6 +33,7 @@ cdl_component CYGPKG_IO_SERIAL_OPENCORES_SERIAL0 {
 
     implements    CYGINT_IO_SERIAL_GENERIC_16X5X_REQUIRED
 
+
     cdl_option CYGDAT_IO_SERIAL_OPENCORES_SERIAL0_NAME {
         display       "Device name"
         flavor        data
@@ -56,7 +57,7 @@ cdl_component CYGPKG_IO_SERIAL_OPENCORES_SERIAL0 {
         display       "Buffer size"
         flavor        data
         legal_values  0 to 8192
-        default_value 0
+        default_value 128
         description   "
             This option specifies the size of the internal buffers used"
     }
@@ -70,20 +71,11 @@ cdl_component CYGPKG_IO_SERIAL_OPENCORES_SERIAL0 {
         This option specifies the I/O address"
     }
 
-    cdl_option CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_IRQ {
-        display "IRQ for the serial port 0"
-        flavor    data
-        legal_values 2 to 31
-        default_value 2
-        description "
-        This option specifies the IRQ of the serial port 0."
-   }
-
     cdl_option CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_INT {
         display "INT for the serial port 0"
         flavor    data
-        legal_values 0 to 47
-        default_value { CYGNUM_IO_SERIAL_OPENCORES_SERIAL0_IRQ }
+        legal_values 2 to 21
+        default_value 2
         description "
         This option specifies the interrupt vector for serial port 0."
    }
